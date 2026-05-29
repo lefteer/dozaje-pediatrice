@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0d47a1">
+<title>Calculator dozaje pediatrice</title>
+<style>
+  :root{
+    --bg:#f4f6f9; --card:#ffffff; --ink:#1a2330; --muted:#5d6b7e;
+    --line:#e1e7ef; --accent:#0d47a1; --accent-soft:#e8f0fe;
+    --warn:#b26a00; --warn-bg:#fff4e0; --danger:#c62828;
+    --ok:#1b7f4b; --shadow:0 1px 3px rgba(20,40,80,.08),0 6px 18px rgba(20,40,80,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.45;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 14px 60px}
+
+  /* sticky control bar */
+  .bar{
+    position:sticky; top:0; z-index:50;
+    background:var(--accent); color:#fff;
+    box-shadow:0 2px 10px rgba(13,71,161,.25);
+  }
+  .bar-inner{max-width:980px;margin:0 auto;padding:10px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .bar h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px;flex:1 1 auto;min-width:140px}
+  .wfield{display:flex;align-items:center;gap:8px;background:#fff;border-radius:10px;padding:6px 10px}
+  .wfield label{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
+  .wfield input{
+    width:78px;border:none;outline:none;font-size:22px;font-weight:800;color:var(--accent);
+    text-align:right;background:transparent;
+  }
+  .wfield span{font-size:13px;color:var(--muted);font-weight:700}
+
+  .search{flex:1 1 180px;min-width:140px}
+  .search input{
+    width:100%;border:none;border-radius:10px;padding:10px 12px;font-size:16px;outline:none;
+  }
+
+  .note{
+    background:var(--warn-bg);border:1px solid #ffe1ad;color:#6a4a10;
+    border-radius:12px;padding:12px 14px;margin:16px 0;font-size:13.5px;
+  }
+  .note b{color:var(--warn)}
+
+  /* category */
+  .cat{margin-top:22px}
+  .cat h2{
+    font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:0 0 10px;font-weight:800;
+  }
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+
+  .drug{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:14px 14px 6px;box-shadow:var(--shadow);
+  }
+  .drug-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px}
+  .drug-name{font-size:16px;font-weight:800}
+  .conc{font-size:11.5px;color:var(--muted);font-weight:700;text-align:right}
+  .conc div{white-space:nowrap}
+
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  td,th{padding:6px 4px;text-align:left}
+  thead th{font-size:11px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--line)}
+  thead th.r,td.r{text-align:right}
+  tbody tr{border-bottom:1px solid #f0f3f7}
+  tbody tr:last-child{border-bottom:none}
+  .dose-lbl{font-weight:700;color:var(--ink);white-space:nowrap}
+  .val{font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .val.mg{color:var(--ok)}
+  .val.capped{color:var(--danger)}
+  .rownote{display:block;font-size:11px;color:var(--muted);font-weight:600;margin-top:1px}
+  .rownote.flag{color:var(--danger)}
+
+  .band{font-size:13.5px;padding:6px 4px;border-bottom:1px solid #f0f3f7}
+  .band:last-child{border-bottom:none}
+  .band b{color:var(--accent)}
+  .band.active{background:var(--accent-soft);border-radius:8px;padding-left:8px}
+
+  /* calc panels */
+  .panel{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px;box-shadow:var(--shadow);margin-top:12px;
+  }
+  .panel h3{margin:0 0 12px;font-size:15px}
+  .ftab{width:100%;border-collapse:collapse;font-size:14px}
+  .ftab th,.ftab td{padding:8px 6px;text-align:right;font-variant-numeric:tabular-nums}
+  .ftab th:first-child,.ftab td:first-child{text-align:left;font-weight:700}
+  .ftab thead th{color:var(--muted);font-size:12px;border-bottom:1px solid var(--line)}
+  .ftab tbody tr{border-bottom:1px solid #f0f3f7}
+  .ftab .big{font-weight:800;color:var(--accent)}
+  .ftab .u{font-size:11px;color:var(--muted);font-weight:600}
+  .ftab-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .ftab{min-width:330px}
+  .ftab th:first-child,.ftab td:first-child{position:sticky;left:0;background:var(--card);z-index:1}
+
+  .nacalc{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+  .nacalc .f{display:flex;flex-direction:column;gap:4px}
+  .nacalc label{font-size:12px;color:var(--muted);font-weight:700}
+  .nacalc input{width:120px;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:16px;font-weight:700;outline:none}
+  .nacalc input:focus{border-color:var(--accent)}
+  .naresult{font-size:15px;margin-left:auto}
+  .naresult b{font-size:26px;color:var(--accent);font-weight:900}
+
+  .disc{font-size:12px;color:var(--muted);margin-top:30px;padding:14px;border-top:1px solid var(--line)}
+  .empty{color:var(--muted);font-size:14px;padding:20px;text-align:center}
+  @media (max-width:520px){
+    .bar h1{flex-basis:100%}
+    .grid{grid-template-columns:1fr}
+    .panel{padding:13px}
+    .ftab{min-width:0;width:100%;table-layout:fixed}
+    .ftab th:first-child,.ftab td:first-child{width:40%}
+    .ftab th,.ftab td{padding:7px 3px;font-size:12.5px}
+    .ftab .u{display:block}
+    .nacalc input{width:100%}
+    .nacalc .f{flex:1 1 130px}
+    .naresult{margin-left:0;flex-basis:100%}
+  }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-inner">
+    <h1>Dozaje pediatrice</h1>
+    <div class="wfield">
+      <label for="w">Greutate</label>
+      <input id="w" type="number" inputmode="decimal" min="0" max="150" step="0.5" value="25">
+      <span>kg</span>
+    </div>
+    <div class="search">
+      <input id="q" type="search" placeholder="Caută medicament…" autocomplete="off">
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="note">
+    <b>Atenție.</b> Instrument de sprijin decizional — verificați întotdeauna doza, concentrația
+    și volumul înainte de administrare. Volumele se calculează din greutate; concentrațiile
+    sunt cele uzuale și pot diferi de produsul disponibil.
+  </div>
+
+  <div id="meds"></div>
+
+  <div class="cat">
+    <h2>Fluide & rehidratare</h2>
+    <div class="panel">
+      <h3>Necesar de lichide (Holliday-Segar) + deficit</h3>
+      <div class="ftab-scroll">
+        <table class="ftab">
+          <thead>
+            <tr><th></th><th>3%</th><th>5%</th><th>10%</th><th>15%</th></tr>
+          </thead>
+          <tbody id="fluids"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="cat">
+    <h2>Corecție sodiu (hiperglicemie)</h2>
+    <div class="panel">
+      <div class="nacalc">
+        <div class="f">
+          <label for="na">Na măsurat (mmol/l)</label>
+          <input id="na" type="number" inputmode="decimal" step="0.1" value="128">
+        </div>
+        <div class="f">
+          <label for="glu">Glicemie (mg/dl)</label>
+          <input id="glu" type="number" inputmode="decimal" step="1" value="480">
+        </div>
+        <div class="naresult">Na corectat: <b id="naOut">—</b> mmol/l</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disc">
+    Formulă volum: <i>greutate × doză (mg/kg) ÷ (concentrație mg / concentrație ml)</i>.
+    Necesar = 100&nbsp;ml/kg (primele 10&nbsp;kg) + 50&nbsp;ml/kg (10–20&nbsp;kg) + 20&nbsp;ml/kg (&gt;20&nbsp;kg).
+    Rehidratare CAD = (necesar + deficit/2) ÷ 24h. Na corectat = Na + 1,6 × (glicemie − 100)/100.
+  </div>
+
+</div>
+
+<script>
+/* ---------- date medicamente ---------- */
+/* dose.value în mg/kg (sau IU/kg). maxMg = plafon doză (mg). maxMl = plafon volum (ml).
+   showMg: afișează și doza în mg. drops: afișează și picături (×20). flag: notă de verificare. */
+const C = (label,mg,ml)=>({label,mg,ml});
+
+const CATEGORIES = [
+ { name:"Antitermice / Analgezice", drugs:[
+   { name:"Paracetamol", conc:[C("120mg/5ml",120,5),C("150mg/5ml",150,5),C("200mg/5ml",200,5)],
+     doses:[{label:"10 mg/kg",value:10},{label:"12 mg/kg",value:12},{label:"15 mg/kg",value:15}] },
+   { name:"Ibuprofen", conc:[C("100mg/5ml",100,5),C("200mg/5ml",200,5)],
+     doses:[{label:"5 mg/kg",value:5},{label:"7,5 mg/kg",value:7.5,flag:"Excel: 7 mg/kg (greșit)",altValue:7},{label:"10 mg/kg",value:10}] },
+   { name:"Locamin", conc:[C("500mg/ml",500,1)],
+     doses:[{label:"10 mg/kg",value:10,drops:true},{label:"15 mg/kg",value:15,drops:true}] },
+   { name:"Paracetamol IV", conc:[C("10mg/1ml",10,1)],
+     doses:[{label:"10 mg/kg",value:10},{label:"15 mg/kg",value:15}] },
+ ]},
+ { name:"Antiemetice", drugs:[
+   { name:"Osetron", conc:[C("2mg/20ml",2,20)],
+     doses:[{label:"0,1 mg/kg",value:0.1}] },
+   { name:"Granisetron", conc:[C("1mg/10ml",1,10)],
+     doses:[{label:"0,02 mg/kg",value:0.02},{label:"0,04 mg/kg",value:0.04}] },
+   { name:"Metoclopramid", conc:[C("10mg/10ml",10,10)],
+     doses:[{label:"0,1 mg/kg",value:0.1},{label:"0,15 mg/kg",value:0.15}] },
+ ]},
+ { name:"Corticoizi", drugs:[
+   { name:"Hidrocortizon", conc:[C("100mg/2ml",100,2)],
+     doses:[{label:"4 mg/kg",value:4},{label:"10 mg/kg",value:10,note:"șoc anafilactic / astm"}] },
+   { name:"Dexametazonă", conc:[C("8mg/8ml",8,8)],
+     doses:[{label:"0,15 mg/kg",value:0.15},{label:"0,2 mg/kg",value:0.2},{label:"0,3 mg/kg",value:0.3},{label:"0,6 mg/kg",value:0.6}] },
+ ]},
+ { name:"Respirator (nebulizări)", drugs:[
+   { name:"Adrenalină (neb)", conc:[C("1mg/1ml",1,1)],
+     doses:[{label:"0,3 mg/kg",value:0.3,maxMl:5},{label:"0,4 mg/kg",value:0.4,maxMl:5},{label:"0,5 mg/kg",value:0.5,maxMl:5}] },
+   { name:"Ventolin (neb)", conc:[C("5mg/1ml",5,1)],
+     doses:[{label:"0,15 mg/kg",value:0.15,note:"MAX 3 repetări"}] },
+ ]},
+ { name:"Resuscitare / urgențe cardiace", drugs:[
+   { name:"Adrenalină IV", conc:[C("0,1mg/1ml",0.1,1)],
+     doses:[{label:"0,01 mg/kg",value:0.01,note:"SCR, <60 bpm"},{label:"0,001 mg/kg",value:0.001,note:"șoc anafilactic"}] },
+   { name:"Amiodaronă", conc:[C("150mg/3ml",150,3)],
+     doses:[{label:"5 mg/kg",value:5}] },
+   { name:"MgSO4", conc:[C("1200mg/5ml",1200,5)],
+     doses:[{label:"25 mg/kg",value:25},{label:"50 mg/kg",value:50}] },
+   { name:"Adenozină", conc:[C("10mg/10ml",10,10)],
+     doses:[{label:"0,1 mg/kg",value:0.1,maxMl:6,note:"MAX 6 ml"},{label:"0,2 mg/kg",value:0.2,maxMl:12,note:"MAX 12 ml"}] },
+   { name:"Atropină", conc:[C("1mg/10ml",1,10)],
+     doses:[{label:"0,02 mg/kg",value:0.02}] },
+ ]},
+ { name:"Sedare / anticonvulsivante", drugs:[
+   { name:"Midazolam", conc:[C("5mg/5ml",5,5),C("5mg/10ml",5,10)],
+     doses:[{label:"0,2 mg/kg",value:0.2,maxMg:10,note:"intramuscular"},{label:"0,15 mg/kg",value:0.15,maxMg:10,note:"IV/IO"}] },
+   { name:"Lorazepam", conc:[C("4mg/4ml",4,4)],
+     doses:[{label:"0,1 mg/kg",value:0.1,maxMg:4,note:"MAX 4 mg"}] },
+   { name:"Diazepam", conc:[C("10mg/2ml",10,2)],
+     doses:[{label:"0,2 mg/kg",value:0.2,showMg:true},{label:"0,3 mg/kg",value:0.3,showMg:true,flag:"Excel: 0,32 mg/kg (greșit)",altValue:0.32}] },
+   { name:"Levetiracetam", conc:[C("500mg/fl",500,null)],
+     doses:[{label:"40 mg/kg",value:40,onlyMg:true,note:"MAX 4,5 g în 5 min"},{label:"50 mg/kg",value:50,onlyMg:true},{label:"60 mg/kg",value:60,onlyMg:true}] },
+   { name:"Fosfenitoină", conc:[C("250mg/5ml",250,5)],
+     doses:[{label:"20 mg/kg",value:20,showMg:true,note:"MAX 1,5 g în 20 min"}] },
+   { name:"Fenobarbital", conc:[C("200mg/2ml",200,2)],
+     doses:[{label:"20 mg/kg",value:20,showMg:true,note:"în 15 min"}] },
+ ]},
+ { name:"Anestezie / RSI", drugs:[
+   { name:"Fentanyl", conc:[C("0,05mg/5ml",0.05,5)],
+     doses:[{label:"0,001 mg/kg",value:0.001},{label:"0,002 mg/kg",value:0.002}] },
+   { name:"Midazolam (anestezie)", conc:[C("5mg/10ml",5,10)],
+     doses:[{label:"0,05 mg/kg",value:0.05,note:"sedare"},{label:"0,1 mg/kg",value:0.1,note:"inducție"}] },
+   { name:"Ketamină", conc:[C("50mg/5ml",50,5)],
+     doses:[{label:"1 mg/kg",value:1,note:"sedare"},{label:"2 mg/kg",value:2,note:"inducție"}] },
+   { name:"Propofol", conc:[C("10mg/1ml",10,1)],
+     doses:[{label:"1 mg/kg",value:1,note:"sedare"},{label:"2 mg/kg",value:2,note:"inducție"},{label:"3 mg/kg",value:3,note:"inducție"}] },
+   { name:"Esmeron", conc:[C("10mg/1ml",10,1)],
+     doses:[{label:"1 mg/kg",value:1},{label:"1,2 mg/kg",value:1.2}] },
+   { name:"Lysthenon", conc:[C("100mg/5ml",100,5)],
+     doses:[{label:"1 mg/kg",value:1},{label:"2 mg/kg",value:2}] },
+ ]},
+ { name:"Alergie / metabolic", drugs:[
+   { name:"Insulină", conc:[C("40IU/40ml",40,40)],
+     doses:[{label:"0,1 IU/kg",value:0.1,unit:"IU"}] },
+   { name:"Aerius", conc:[C("0,5mg/ml",0.5,1)], ageBands:[
+     {label:"1–5 ani",text:"2,5 ml"},{label:"6–12 ani",text:"5 ml"},{label:"&gt; 12 ani",text:"10 ml"}] },
+   { name:"Desitin (diazepam rectal)", weightBands:[
+     {label:"&lt; 15 kg",text:"tub de 5 mg",max:15},{label:"&gt; 15 kg",text:"tub de 10 mg",min:15}] },
+ ]},
+ { name:"Antibiotice (suspensii orale)", drugs:[
+   { name:"Augmentin", conc:[C("400mg/5ml",400,5),C("600mg/5ml",600,5)],
+     doses:[{label:"25 mg/kg",value:25},{label:"40 mg/kg",value:40},{label:"50 mg/kg",value:50}] },
+   { name:"Zinnat", conc:[C("125mg/5ml",125,5),C("250mg/5ml",250,5)],
+     doses:[{label:"20 mg/kg",value:20},{label:"30 mg/kg",value:30},{label:"40 mg/kg",value:40}] },
+   { name:"Azitrox", conc:[C("100mg/5ml",100,5),C("200mg/5ml",200,5)],
+     doses:[{label:"10 mg/kg",value:10}] },
+   { name:"Klacid", conc:[C("125mg/5ml",125,5),C("250mg/5ml (Klabax)",250,5)],
+     doses:[{label:"15 mg/kg",value:15},{label:"20 mg/kg",value:20},{label:"30 mg/kg",value:30}] },
+   { name:"Eritromicină", conc:[C("200mg/5ml",200,5)],
+     doses:[{label:"30 mg/kg",value:30},{label:"50 mg/kg",value:50}] },
+ ]},
+];
+
+/* ---------- utils ---------- */
+function fmt(n,dec){
+  if(!isFinite(n)) return "—";
+  dec = dec==null?2:dec;
+  return n.toLocaleString('ro-RO',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+/* ---------- render medicamente ---------- */
+function renderMeds(){
+  const w = parseFloat(document.getElementById('w').value) || 0;
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const root = document.getElementById('meds');
+  let html = '';
+
+  CATEGORIES.forEach(cat=>{
+    const drugs = cat.drugs.filter(d=> !q || d.name.toLowerCase().includes(q));
+    if(!drugs.length) return;
+    html += `<div class="cat"><h2>${esc(cat.name)}</h2><div class="grid">`;
+    drugs.forEach(d=> html += drugCard(d,w));
+    html += `</div></div>`;
+  });
+
+  root.innerHTML = html || `<div class="empty">Niciun medicament nu corespunde căutării.</div>`;
+}
+
+function drugCard(d,w){
+  let head = `<div class="drug-head"><span class="drug-name">${esc(d.name)}</span>`;
+  if(d.conc){
+    head += `<span class="conc">`+d.conc.map(c=>`<div>${esc(c.label)}</div>`).join('')+`</span>`;
+  }
+  head += `</div>`;
+
+  // age bands (Aerius)
+  if(d.ageBands){
+    let b = d.ageBands.map(x=>`<div class="band"><b>${x.label}</b> — ${x.text}</div>`).join('');
+    return `<div class="drug">${head}${b}</div>`;
+  }
+  // weight bands (Desitin)
+  if(d.weightBands){
+    let b = d.weightBands.map(x=>{
+      const active = (x.max!=null && w>0 && w<x.max) || (x.min!=null && w>=x.min);
+      return `<div class="band${active?' active':''}"><b>${x.label}</b> — ${x.text}</div>`;
+    }).join('');
+    return `<div class="drug">${head}${b}</div>`;
+  }
+
+  // dose table
+  const multi = d.conc.length>1;
+  let thead = `<thead><tr><th>Doză</th>`;
+  if(multi) d.conc.forEach(c=> thead += `<th class="r">${esc(c.label)}</th>`);
+  else thead += `<th class="r">Volum</th>`;
+  thead += `</tr></thead>`;
+
+  let body = '<tbody>';
+  d.doses.forEach(dose=>{
+    body += `<tr><td><span class="dose-lbl">${esc(dose.label)}</span>`;
+    if(dose.note) body += `<span class="rownote">${esc(dose.note)}</span>`;
+    if(dose.flag) body += `<span class="rownote flag">⚠ ${esc(dose.flag)}</span>`;
+    body += `</td>`;
+    d.conc.forEach(c=> body += `<td class="r">${cell(dose,c,w)}</td>`);
+    body += `</tr>`;
+  });
+  body += '</tbody>';
+
+  return `<div class="drug">${head}<table>${thead}${body}</table></div>`;
+}
+
+function cell(dose,c,w){
+  if(w<=0) return '—';
+  let mg = w*dose.value;                 // doza totală (mg sau IU)
+  let capMg=false;
+  if(dose.maxMg!=null && mg>dose.maxMg){ mg=dose.maxMg; capMg=true; }
+
+  // numai mg (ex: Levetiracetam reconstituit)
+  if(dose.onlyMg || c.ml==null){
+    const g = mg>=1000? ` (${fmt(mg/1000,2)} g)`:'';
+    return `<span class="val mg${capMg?' capped':''}">${fmt(mg,0)} mg${g}</span>`;
+  }
+
+  const perMl = c.mg/c.ml;               // mg per ml
+  let ml = mg/perMl;
+  let capMl=false;
+  if(dose.maxMl!=null && ml>dose.maxMl){ ml=dose.maxMl; capMl=true; }
+
+  const cls = (capMg||capMl)?'val capped':'val';
+  let out;
+  if(dose.showMg){
+    out = `<span class="${cls}">${fmt(mg,2)} mg</span><span class="rownote">${fmt(ml,2)} ml</span>`;
+    if(dose.altValue!=null) out += `<span class="rownote flag">Excel: ${fmt(w*dose.altValue,2)} mg</span>`;
+  } else {
+    out = `<span class="${cls}">${fmt(ml,2)} ml</span>`;
+    if(dose.drops) out += `<span class="rownote">${fmt(ml*20,0)} pic.</span>`;
+    if(dose.altValue!=null) out += `<span class="rownote flag">Excel: ${fmt((w*dose.altValue)/perMl,2)} ml</span>`;
+  }
+  return out;
+}
+
+/* ---------- fluide ---------- */
+function maintenance(w){
+  if(w<=0) return 0;
+  if(w<=10) return 100*w;
+  if(w<=20) return 1000+50*(w-10);
+  return 1500+20*(w-20);
+}
+function renderFluids(){
+  const w = parseFloat(document.getElementById('w').value)||0;
+  const tb = document.getElementById('fluids');
+  const pcts=[3,5,10,15];
+  const m = maintenance(w);
+  const def = pcts.map(p=> w*p*10);              // ml
+  const total = def.map(d=> m+d);
+  const rate = total.map(t=> t/24);
+  const cad = def.map(d=> (m+d/2)/24);
+  const row=(label,vals,dec,big)=>`<tr><td>${label}</td>`+vals.map(v=>`<td class="${big?'big':''}">${fmt(v,dec)}</td>`).join('')+`</tr>`;
+  tb.innerHTML =
+    `<tr><td>Necesar 24h <span class="u">ml</span></td><td colspan="4" style="text-align:left" class="big">${fmt(m,0)}</td></tr>`+
+    row('Deficit <span class="u">ml</span>', def, 0, false)+
+    row('Necesar + deficit <span class="u">ml</span>', total, 0, false)+
+    row('Rată /24h <span class="u">ml/h</span>', rate, 2, true)+
+    row('Rehidratare CAD <span class="u">ml/h</span>', cad, 2, false);
+}
+
+/* ---------- Na corectat ---------- */
+function renderNa(){
+  const na = parseFloat(document.getElementById('na').value);
+  const glu = parseFloat(document.getElementById('glu').value);
+  const out = document.getElementById('naOut');
+  if(!isFinite(na)||!isFinite(glu)){ out.textContent='—'; return; }
+  out.textContent = fmt(na + 1.6*(glu-100)/100, 2);
+}
+
+/* ---------- events ---------- */
+function renderAll(){ renderMeds(); renderFluids(); }
+['input','change'].forEach(ev=>{
+  document.getElementById('w').addEventListener(ev,renderAll);
+  document.getElementById('q').addEventListener(ev,renderMeds);
+  document.getElementById('na').addEventListener(ev,renderNa);
+  document.getElementById('glu').addEventListener(ev,renderNa);
+});
+renderAll(); renderNa();
+</script>
+</body>
+</html>
