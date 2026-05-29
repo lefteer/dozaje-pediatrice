@@ -31,15 +31,16 @@
   .bar h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px;flex:1 1 auto;min-width:140px}
   .wfield{display:flex;align-items:center;gap:8px;background:#fff;border-radius:10px;padding:6px 10px}
   .wfield label{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
-  .wfield input{
-    width:78px;border:none;outline:none;font-size:22px;font-weight:800;color:var(--accent);
-    text-align:right;background:transparent;
+  .wfield select{
+    border:none;outline:none;font-size:21px;font-weight:800;color:var(--accent);
+    background:transparent;cursor:pointer;padding:0 2px;
   }
   .wfield span{font-size:13px;color:var(--muted);font-weight:700}
 
   .search{flex:1 1 180px;min-width:140px}
-  .search input{
+  .search select{
     width:100%;border:none;border-radius:10px;padding:10px 12px;font-size:16px;outline:none;
+    background:#fff;color:var(--ink);cursor:pointer;
   }
 
   .note{
@@ -131,11 +132,11 @@
     <h1>Dozaje pediatrice</h1>
     <div class="wfield">
       <label for="w">Greutate</label>
-      <input id="w" type="number" inputmode="decimal" min="0" max="150" step="0.5" value="25">
+      <select id="w"></select>
       <span>kg</span>
     </div>
     <div class="search">
-      <input id="q" type="search" placeholder="Caută medicament…" autocomplete="off">
+      <select id="q"></select>
     </div>
   </div>
 </div>
@@ -300,12 +301,12 @@ function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>
 /* ---------- render medicamente ---------- */
 function renderMeds(){
   const w = parseFloat(document.getElementById('w').value) || 0;
-  const q = document.getElementById('q').value.trim().toLowerCase();
+  const q = document.getElementById('q').value;
   const root = document.getElementById('meds');
   let html = '';
 
   CATEGORIES.forEach(cat=>{
-    const drugs = cat.drugs.filter(d=> !q || d.name.toLowerCase().includes(q));
+    const drugs = cat.drugs.filter(d=> !q || d.name===q);
     if(!drugs.length) return;
     html += `<div class="cat"><h2>${esc(cat.name)}</h2><div class="grid">`;
     drugs.forEach(d=> html += drugCard(d,w));
@@ -421,6 +422,24 @@ function renderNa(){
   out.textContent = fmt(na + 1.6*(glu-100)/100, 2);
 }
 
+/* ---------- populare dropdown-uri ---------- */
+function buildControls(){
+  const ws=document.getElementById('w');
+  let wo='';
+  for(let v=2; v<=10.0001; v+=0.5){ const lbl=Number.isInteger(v)?String(v):String(v).replace('.',','); wo+=`<option value="${v}">${lbl}</option>`; }
+  for(let v=11; v<=80; v++){ wo+=`<option value="${v}">${v}</option>`; }
+  ws.innerHTML=wo; ws.value="25";
+
+  const qs=document.getElementById('q');
+  let qo='<option value="">Toate medicamentele</option>';
+  CATEGORIES.forEach(cat=>{
+    qo+=`<optgroup label="${esc(cat.name)}">`;
+    cat.drugs.forEach(d=> qo+=`<option value="${esc(d.name)}">${esc(d.name)}</option>`);
+    qo+='</optgroup>';
+  });
+  qs.innerHTML=qo;
+}
+
 /* ---------- events ---------- */
 function renderAll(){ renderMeds(); renderFluids(); }
 ['input','change'].forEach(ev=>{
@@ -429,7 +448,7 @@ function renderAll(){ renderMeds(); renderFluids(); }
   document.getElementById('na').addEventListener(ev,renderNa);
   document.getElementById('glu').addEventListener(ev,renderNa);
 });
-renderAll(); renderNa();
+buildControls(); renderAll(); renderNa();
 </script>
 </body>
 </html>
