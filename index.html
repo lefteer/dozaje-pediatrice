@@ -23,6 +23,7 @@
     -webkit-text-size-adjust:100%; -webkit-tap-highlight-color:transparent;
   }
   button,input{font:inherit;color:inherit}
+  input{-webkit-appearance:none;appearance:none}
   button{cursor:pointer}
   .num{font-variant-numeric:tabular-nums}
 
@@ -33,10 +34,10 @@
     box-shadow:0 6px 18px rgba(15,27,45,.18);
   }
   .bar-in{max-width:1080px;margin:0 auto;padding:10px 16px 14px;display:grid;
-    grid-template-columns:1fr auto;grid-template-areas:"titlu filtru" "greutate greutate";gap:10px 12px;align-items:center}
+    grid-template-columns:auto minmax(0,1fr);grid-template-areas:"titlu filtru" "greutate greutate";gap:10px 12px;align-items:center}
   .bar h1{grid-area:titlu;margin:0;font-size:16px;font-weight:700;letter-spacing:.1px;white-space:nowrap}
   .filt{
-    grid-area:filtru;justify-self:end;max-width:220px;height:40px;border-radius:999px;
+    grid-area:filtru;justify-self:end;min-width:0;max-width:100%;height:40px;border-radius:999px;
     border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;
     display:flex;align-items:center;gap:7px;padding:0 12px 0 13px;font-size:14px;font-weight:700;
   }
@@ -192,6 +193,13 @@
     .ftab th,.ftab td{padding:8px 3px}
     .ftab .u{display:block}
   }
+  /* telefoane înguste: titlul și butonul listei încap pe un rând */
+  @media (max-width:399px){
+    .bar-in{column-gap:8px}
+    .bar h1{font-size:15px}
+    .filt{gap:5px;padding:0 10px 0 12px;font-size:13.5px}
+    .filt .ic-cauta{display:none}
+  }
   @media (max-width:380px){
     .r-v b{font-size:21px}
     .st-btn{width:50px;height:50px}
@@ -216,7 +224,7 @@
       </button>
     </div>
     <button class="filt" id="filt" type="button" aria-haspopup="dialog" aria-controls="sheet">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <svg class="ic-cauta" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <span id="filtLbl">Toate medicamentele</span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </button>
