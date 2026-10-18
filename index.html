@@ -2,199 +2,291 @@
 <html lang="ro">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0d47a1">
-<title>Calculator dozaje pediatrice</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1748A6">
+<title>Dozaje pediatrice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700;800&display=swap">
 <style>
   :root{
-    --bg:#f4f6f9; --card:#ffffff; --ink:#1a2330; --muted:#5d6b7e;
-    --line:#e1e7ef; --accent:#0d47a1; --accent-soft:#e8f0fe;
-    --warn:#b26a00; --warn-bg:#fff4e0; --danger:#c62828;
-    --ok:#1b7f4b; --shadow:0 1px 3px rgba(20,40,80,.08),0 6px 18px rgba(20,40,80,.06);
+    --bg:#F2F4F7; --card:#FFFFFF; --ink:#0F1B2D; --ink-2:#3D4858; --muted:#5B6676;
+    --line:#E3E8EF; --line-2:#EEF1F5; --accent:#1748A6; --accent-ink:#0F3478; --accent-soft:#E8EEFA;
+    --danger:#B42318; --danger-soft:#FDECEA;
+    --radius:18px;
+    --font:"Atkinson Hyperlegible Next","Atkinson Hyperlegible",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    background:var(--bg); color:var(--ink); line-height:1.45;
-    -webkit-text-size-adjust:100%;
+    font-family:var(--font); background:var(--bg); color:var(--ink); line-height:1.4;
+    -webkit-text-size-adjust:100%; -webkit-tap-highlight-color:transparent;
   }
-  .wrap{max-width:980px;margin:0 auto;padding:0 14px 60px}
+  button,input{font:inherit;color:inherit}
+  button{cursor:pointer}
+  .num{font-variant-numeric:tabular-nums}
 
-  /* sticky control bar */
+  /* ---------- antet ---------- */
   .bar{
-    position:sticky; top:0; z-index:50;
-    background:var(--accent); color:#fff;
-    box-shadow:0 2px 10px rgba(13,71,161,.25);
+    position:sticky; top:0; z-index:50; background:var(--accent); color:#fff;
+    padding-top:env(safe-area-inset-top);
+    box-shadow:0 6px 18px rgba(15,27,45,.18);
   }
-  .bar-inner{max-width:980px;margin:0 auto;padding:10px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-  .bar h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px;flex:1 1 auto;min-width:140px}
-  .wfield{display:flex;align-items:center;gap:8px;background:#fff;border-radius:10px;padding:6px 10px}
-  .wfield label{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
-  .wfield select{
-    border:none;outline:none;font-size:21px;font-weight:800;color:var(--accent);
-    background:transparent;cursor:pointer;padding:0 2px;
+  .bar-in{max-width:1080px;margin:0 auto;padding:10px 16px 14px;display:grid;
+    grid-template-columns:1fr auto;grid-template-areas:"titlu filtru" "greutate greutate";gap:10px 12px;align-items:center}
+  .bar h1{grid-area:titlu;margin:0;font-size:16px;font-weight:700;letter-spacing:.1px;white-space:nowrap}
+  .filt{
+    grid-area:filtru;justify-self:end;max-width:220px;height:40px;border-radius:999px;
+    border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;
+    display:flex;align-items:center;gap:7px;padding:0 12px 0 13px;font-size:14px;font-weight:700;
   }
-  .wfield span{font-size:13px;color:var(--muted);font-weight:700}
+  .filt:hover{background:rgba(255,255,255,.2)}
+  .filt span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .filt svg{flex:none}
 
-  .search{flex:1 1 180px;min-width:140px}
-  .search select{
-    width:100%;border:none;border-radius:10px;padding:10px 12px;font-size:16px;outline:none;
-    background:#fff;color:var(--ink);cursor:pointer;
+  .stepper{grid-area:greutate;display:flex;align-items:center;gap:8px;background:#fff;border-radius:20px;padding:6px;color:var(--ink)}
+  .st-btn{
+    width:54px;height:54px;flex:none;border-radius:15px;border:none;
+    display:flex;align-items:center;justify-content:center;touch-action:manipulation;user-select:none;-webkit-user-select:none;
   }
-
-  .note{
-    background:var(--warn-bg);border:1px solid #ffe1ad;color:#6a4a10;
-    border-radius:12px;padding:12px 14px;margin:16px 0;font-size:13.5px;
+  .st-minus{background:var(--accent-soft);color:var(--accent)}
+  .st-plus{background:var(--accent);color:#fff}
+  .st-btn:active{transform:scale(.96)}
+  .st-btn:disabled{opacity:.35;cursor:default;transform:none}
+  .st-val{flex:1;display:flex;flex-direction:column;align-items:center;cursor:text;min-width:0}
+  .st-lbl{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .st-num{display:flex;align-items:baseline;gap:5px}
+  .st-num input{
+    border:none;outline:none;background:transparent;padding:0;margin:0;text-align:center;
+    font-size:30px;line-height:1.1;font-weight:800;letter-spacing:-.5px;font-variant-numeric:tabular-nums;
+    width:3ch;min-width:2ch;border-bottom:2px solid transparent;border-radius:0;
   }
-  .note b{color:var(--warn)}
+  .st-num input:focus{border-bottom-color:var(--accent)}
+  .st-u{font-size:15px;font-weight:700;color:var(--muted)}
 
-  /* category */
+  /* ---------- conținut ---------- */
+  .wrap{max-width:1080px;margin:0 auto;padding:4px 16px calc(40px + env(safe-area-inset-bottom))}
+  .pickbar{padding-top:14px}
+  .chip-x{
+    height:38px;border:none;border-radius:999px;background:var(--accent-soft);color:var(--accent);
+    display:inline-flex;align-items:center;gap:8px;padding:0 13px 0 15px;font-size:14px;font-weight:700;
+  }
   .cat{margin-top:22px}
-  .cat h2{
-    font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
-    margin:0 0 10px;font-weight:800;
+  .cat h2{margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;align-items:start}
+
+  .drug{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 14px 4px}
+  .d-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:10px}
+  .d-head h3{margin:0;font-size:18px;font-weight:800;line-height:1.2}
+  .conc{font-size:12.5px;font-weight:700;color:var(--ink-2);background:var(--bg);border-radius:999px;padding:4px 10px;white-space:nowrap}
+
+  .seg{display:flex;gap:4px;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:8px}
+  .seg button{
+    flex:1 1 0;min-width:0;min-height:38px;border:none;border-radius:9px;background:transparent;color:var(--muted);
+    font-size:13px;font-weight:700;line-height:1.15;padding:4px 6px;
   }
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+  .seg button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(15,27,45,.16)}
 
-  .drug{
-    background:var(--card);border:1px solid var(--line);border-radius:14px;
-    padding:14px 14px 6px;box-shadow:var(--shadow);
-  }
-  .drug-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px}
-  .drug-name{font-size:16px;font-weight:800}
-  .conc{font-size:11.5px;color:var(--muted);font-weight:700;text-align:right}
-  .conc div{white-space:nowrap}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line-2)}
+  .r-l{min-width:0}
+  .r-dose{font-size:15px;font-weight:700}
+  .r-sub{font-size:12.5px;color:var(--muted);margin-top:1px}
+  .r-v{text-align:right;flex:none;font-variant-numeric:tabular-nums}
+  .r-v b{font-size:24px;font-weight:800;color:var(--accent);letter-spacing:-.3px}
+  .r-v b.cap{color:var(--danger)}
+  .r-v i{font-style:normal;font-size:13px;font-weight:700;color:var(--muted)}
+  .r-x{font-size:12px;color:var(--muted)}
 
-  table{width:100%;border-collapse:collapse;font-size:14px}
-  td,th{padding:6px 4px;text-align:left}
-  thead th{font-size:11px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--line)}
-  thead th.r,td.r{text-align:right}
-  tbody tr{border-bottom:1px solid #f0f3f7}
-  tbody tr:last-child{border-bottom:none}
-  .dose-lbl{font-weight:700;color:var(--ink);white-space:nowrap}
-  .val{font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
-  .val.mg{color:var(--ok)}
-  .val.capped{color:var(--danger)}
-  .rownote{display:block;font-size:11px;color:var(--muted);font-weight:600;margin-top:1px}
-  .rownote.flag{color:var(--danger)}
+  .band{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 10px;margin:0 -10px;border-top:1px solid var(--line-2);font-size:15px}
+  .band b{font-weight:700}
+  .band span{font-weight:800;color:var(--accent);text-align:right}
+  .band.on{background:var(--accent-soft);border-radius:12px;border-top-color:transparent}
+  .band.on + .band{border-top-color:transparent}
+  .drug .band:last-child{margin-bottom:6px}
 
-  .band{font-size:13.5px;padding:6px 4px;border-bottom:1px solid #f0f3f7}
-  .band:last-child{border-bottom:none}
-  .band b{color:var(--accent)}
-  .band.active{background:var(--accent-soft);border-radius:8px;padding-left:8px}
-
-  /* calc panels */
-  .panel{
-    background:var(--card);border:1px solid var(--line);border-radius:14px;
-    padding:16px;box-shadow:var(--shadow);margin-top:12px;
-  }
-  .panel h3{margin:0 0 12px;font-size:15px}
-  .ftab{width:100%;border-collapse:collapse;font-size:14px}
-  .ftab th,.ftab td{padding:8px 6px;text-align:right;font-variant-numeric:tabular-nums}
-  .ftab th:first-child,.ftab td:first-child{text-align:left;font-weight:700}
-  .ftab thead th{color:var(--muted);font-size:12px;border-bottom:1px solid var(--line)}
-  .ftab tbody tr{border-bottom:1px solid #f0f3f7}
-  .ftab .big{font-weight:800;color:var(--accent)}
-  .ftab .u{font-size:11px;color:var(--muted);font-weight:600}
+  /* ---------- fluide + sodiu ---------- */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .panel h3{margin:0 0 4px;font-size:18px;font-weight:800}
+  .panel .lead{margin:0 0 12px;font-size:13px;color:var(--muted)}
   .ftab-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .ftab{min-width:330px}
-  .ftab th:first-child,.ftab td:first-child{position:sticky;left:0;background:var(--card);z-index:1}
+  .ftab{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+  .ftab th,.ftab td{padding:9px 6px;text-align:right}
+  .ftab th:first-child,.ftab td:first-child{text-align:left;font-weight:700}
+  .ftab thead th{font-size:12px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--line)}
+  .ftab tbody tr{border-bottom:1px solid var(--line-2)}
+  .ftab tbody tr:last-child{border-bottom:none}
+  .ftab .big{font-weight:800;color:var(--accent)}
+  .ftab .u{font-size:11.5px;color:var(--muted);font-weight:600}
+  .ftab tr.hl td{background:var(--accent-soft)}
+  .ftab tr.hl td:first-child{border-radius:10px 0 0 10px}
+  .ftab tr.hl td:last-child{border-radius:0 10px 10px 0}
 
-  .nacalc{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
-  .nacalc .f{display:flex;flex-direction:column;gap:4px}
-  .nacalc label{font-size:12px;color:var(--muted);font-weight:700}
-  .nacalc input{width:120px;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:16px;font-weight:700;outline:none}
+  .nacalc{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+  .nacalc .f{display:flex;flex-direction:column;gap:5px;flex:1 1 140px}
+  .nacalc label{font-size:12.5px;color:var(--muted);font-weight:700}
+  .nacalc input{width:100%;height:48px;border:1.5px solid var(--line);border-radius:12px;padding:0 12px;font-size:18px;font-weight:700;outline:none;background:#fff;font-variant-numeric:tabular-nums}
   .nacalc input:focus{border-color:var(--accent)}
-  .naresult{font-size:15px;margin-left:auto}
-  .naresult b{font-size:26px;color:var(--accent);font-weight:900}
+  .naresult{flex:1 1 100%;display:flex;align-items:baseline;justify-content:space-between;gap:10px;background:var(--accent-soft);border-radius:14px;padding:12px 14px;font-weight:700;color:var(--ink-2)}
+  .naresult b{font-size:28px;color:var(--accent);font-weight:800;font-variant-numeric:tabular-nums}
+  .naresult i{font-style:normal;font-size:13px;color:var(--muted)}
 
-  .disc{font-size:12px;color:var(--muted);margin-top:30px;padding:14px;border-top:1px solid var(--line)}
-  .empty{color:var(--muted);font-size:14px;padding:20px;text-align:center}
+  .empty{color:var(--muted);font-size:15px;padding:40px 10px;text-align:center}
+
+  .disc{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;line-height:1.55;color:var(--muted)}
+  .disc p{margin:0 0 8px}
+  .disc i{font-style:normal;font-weight:700;color:var(--ink-2)}
+
+  /* ---------- lista medicamentelor ---------- */
+  .sheet{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;justify-content:flex-end}
+  .sheet[hidden]{display:none}
+  .sheet-bg{position:absolute;inset:0;border:none;background:rgba(15,27,45,.42);padding:0}
+  .sheet-p{
+    position:relative;background:#fff;border-radius:22px 22px 0 0;max-height:82vh;max-height:82dvh;
+    display:flex;flex-direction:column;box-shadow:0 -10px 30px rgba(15,27,45,.2);
+    padding-bottom:env(safe-area-inset-bottom);animation:urca .18s ease-out;
+  }
+  @keyframes urca{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+  .grip{width:40px;height:5px;border-radius:999px;background:#D9DFE8;margin:10px auto 4px}
+  .sh-top{padding:6px 16px 10px;display:flex;flex-direction:column;gap:10px}
+  .sh-row{display:flex;align-items:center;justify-content:space-between}
+  .sh-row h2{margin:0;font-size:17px;font-weight:800}
+  .txtbtn{height:44px;padding:0 4px;border:none;background:transparent;color:var(--accent);font-size:15px;font-weight:700}
+  .srch{display:flex;align-items:center;gap:8px;height:46px;border-radius:12px;background:var(--bg);padding:0 12px}
+  .srch input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:16px}
+  .sh-list{overflow-y:auto;padding:0 8px 18px;overscroll-behavior:contain}
+  .sh-list .grp{padding:14px 8px 4px;font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .sh-list button{display:block;width:100%;min-height:46px;border:none;border-radius:10px;background:transparent;text-align:left;padding:0 8px;font-size:16px}
+  .sh-list button:hover{background:var(--bg)}
+  .sh-list button.on{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
+  .sh-list .all{color:var(--accent);font-weight:700}
+  .sh-list .none{padding:20px 8px;color:var(--muted)}
+
+  :focus-visible{outline:3px solid #7FA6F0;outline-offset:2px}
+
+  @media (min-width:760px){
+    .bar-in{grid-template-columns:auto 1fr auto;grid-template-areas:"titlu greutate filtru";padding:12px 20px}
+    .bar h1{font-size:18px}
+    .stepper{justify-self:center;width:340px}
+    .filt{max-width:260px}
+    .wrap{padding-left:20px;padding-right:20px}
+    .sheet{justify-content:center;align-items:center;padding:24px}
+    .sheet-p{width:440px;border-radius:22px;max-height:78vh}
+    .grip{display:none}
+  }
   @media (max-width:520px){
-    .bar h1{flex-basis:100%}
-    .grid{grid-template-columns:1fr}
-    .panel{padding:13px}
-    .ftab{min-width:0;width:100%;table-layout:fixed}
-    .ftab th:first-child,.ftab td:first-child{width:40%}
-    .ftab th,.ftab td{padding:7px 3px;font-size:12.5px}
+    .panel{padding:14px 12px}
+    .ftab{table-layout:fixed;font-size:13px}
+    .ftab th:first-child,.ftab td:first-child{width:34%}
+    .ftab th,.ftab td{padding:8px 3px}
     .ftab .u{display:block}
-    .nacalc input{width:100%}
-    .nacalc .f{flex:1 1 130px}
-    .naresult{margin-left:0;flex-basis:100%}
+  }
+  @media (max-width:380px){
+    .r-v b{font-size:21px}
+    .st-btn{width:50px;height:50px}
   }
 </style>
 </head>
 <body>
 
-<div class="bar">
-  <div class="bar-inner">
+<header class="bar">
+  <div class="bar-in">
     <h1>Dozaje pediatrice</h1>
-    <div class="wfield">
-      <label for="w">Greutate</label>
-      <select id="w"></select>
-      <span>kg</span>
+    <div class="stepper" role="group" aria-label="Greutatea copilului">
+      <button class="st-btn st-minus" id="wMinus" type="button" aria-label="Scade greutatea">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg>
+      </button>
+      <label class="st-val" for="w">
+        <span class="st-lbl">Greutate</span>
+        <span class="st-num"><input id="w" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" value="25"><span class="st-u">kg</span></span>
+      </label>
+      <button class="st-btn st-plus" id="wPlus" type="button" aria-label="Crește greutatea">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg>
+      </button>
     </div>
-    <div class="search">
-      <select id="q"></select>
-    </div>
+    <button class="filt" id="filt" type="button" aria-haspopup="dialog" aria-controls="sheet">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <span id="filtLbl">Toate medicamentele</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
   </div>
-</div>
+</header>
 
-<div class="wrap">
-
-  <div class="note">
-    <b>Atenție.</b> Instrument de sprijin decizional — verificați întotdeauna doza, concentrația
-    și volumul înainte de administrare. Volumele se calculează din greutate; concentrațiile
-    sunt cele uzuale și pot diferi de produsul disponibil.
+<main class="wrap">
+  <div class="pickbar" id="pickbar" hidden>
+    <button class="chip-x" id="clearPick" type="button">Arată toate medicamentele
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
   </div>
 
   <div id="meds"></div>
 
-  <div class="cat">
-    <h2>Fluide & rehidratare</h2>
-    <div class="panel">
-      <h3>Necesar de lichide (Holliday-Segar) + deficit</h3>
-      <div class="ftab-scroll">
-        <table class="ftab">
-          <thead>
-            <tr><th></th><th>3%</th><th>5%</th><th>10%</th><th>15%</th></tr>
-          </thead>
-          <tbody id="fluids"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div class="cat">
-    <h2>Corecție sodiu (hiperglicemie)</h2>
-    <div class="panel">
-      <div class="nacalc">
-        <div class="f">
-          <label for="na">Na măsurat (mmol/l)</label>
-          <input id="na" type="number" inputmode="decimal" step="0.1" value="128">
+  <div id="tools">
+    <section class="cat">
+      <h2>Fluide &amp; rehidratare</h2>
+      <div class="panel">
+        <h3>Necesar de lichide + deficit</h3>
+        <p class="lead">Holliday-Segar, pe deshidratare de 3–15&nbsp;%.</p>
+        <div class="ftab-scroll">
+          <table class="ftab">
+            <thead>
+              <tr><th></th><th>3%</th><th>5%</th><th>10%</th><th>15%</th></tr>
+            </thead>
+            <tbody id="fluids"></tbody>
+          </table>
         </div>
-        <div class="f">
-          <label for="glu">Glicemie (mg/dl)</label>
-          <input id="glu" type="number" inputmode="decimal" step="1" value="480">
-        </div>
-        <div class="naresult">Na corectat: <b id="naOut">—</b> mmol/l</div>
       </div>
+    </section>
+
+    <section class="cat">
+      <h2>Corecție sodiu (hiperglicemie)</h2>
+      <div class="panel">
+        <div class="nacalc">
+          <div class="f">
+            <label for="na">Na măsurat (mmol/l)</label>
+            <input id="na" type="number" inputmode="decimal" step="0.1" value="128">
+          </div>
+          <div class="f">
+            <label for="glu">Glicemie (mg/dl)</label>
+            <input id="glu" type="number" inputmode="decimal" step="1" value="480">
+          </div>
+          <div class="naresult">Na corectat <span><b id="naOut">—</b> <i>mmol/l</i></span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="disc">
+    <p><i>Volum</i> = greutate × doză (mg/kg) ÷ concentrație (mg/ml).
+      <i>Necesar</i> = 100&nbsp;ml/kg (primele 10&nbsp;kg) + 50&nbsp;ml/kg (10–20&nbsp;kg) + 20&nbsp;ml/kg (&gt;&nbsp;20&nbsp;kg).
+      <i>Rehidratare CAD</i> = (necesar + deficit/2) ÷ 24&nbsp;h.
+      <i>Na corectat</i> = Na + 1,6 × (glicemie − 100)/100.</p>
+    <p>Instrument de sprijin decizional — verificați întotdeauna doza, concentrația și volumul înainte de administrare.
+      Volumele se calculează din greutate; concentrațiile sunt cele uzuale și pot diferi de produsul disponibil.</p>
+  </footer>
+</main>
+
+<div class="sheet" id="sheet" hidden>
+  <button class="sheet-bg" id="sheetBg" type="button" aria-label="Închide lista" tabindex="-1"></button>
+  <div class="sheet-p" role="dialog" aria-modal="true" aria-labelledby="shTitle">
+    <div class="grip" aria-hidden="true"></div>
+    <div class="sh-top">
+      <div class="sh-row">
+        <h2 id="shTitle">Alege un medicament</h2>
+        <button class="txtbtn" id="sheetDone" type="button">Gata</button>
+      </div>
+      <label class="srch">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6676" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="sq" type="search" placeholder="Caută după nume" autocomplete="off" enterkeyhint="search" aria-label="Caută după nume">
+      </label>
     </div>
+    <div class="sh-list" id="shList"></div>
   </div>
-
-  <div class="disc">
-    Formulă volum: <i>greutate × doză (mg/kg) ÷ (concentrație mg / concentrație ml)</i>.
-    Necesar = 100&nbsp;ml/kg (primele 10&nbsp;kg) + 50&nbsp;ml/kg (10–20&nbsp;kg) + 20&nbsp;ml/kg (&gt;20&nbsp;kg).
-    Rehidratare CAD = (necesar + deficit/2) ÷ 24h. Na corectat = Na + 1,6 × (glicemie − 100)/100.
-  </div>
-
 </div>
 
 <script>
 /* ---------- date medicamente ---------- */
 /* dose.value în mg/kg (sau IU/kg). maxMg = plafon doză (mg). maxMl = plafon volum (ml).
-   showMg: afișează și doza în mg. drops: afișează și picături (×20). flag: notă de verificare. */
+   showMg: afișează doza în mg (volumul dedesubt). drops: afișează și picături (×20). */
 const C = (label,mg,ml)=>({label,mg,ml});
 
 const CATEGORIES = [
@@ -202,7 +294,7 @@ const CATEGORIES = [
    { name:"Paracetamol", conc:[C("120mg/5ml",120,5),C("150mg/5ml",150,5),C("200mg/5ml",200,5)],
      doses:[{label:"10 mg/kg",value:10},{label:"12 mg/kg",value:12},{label:"15 mg/kg",value:15}] },
    { name:"Ibuprofen", conc:[C("100mg/5ml",100,5),C("200mg/5ml",200,5)],
-     doses:[{label:"5 mg/kg",value:5},{label:"7,5 mg/kg",value:7.5,flag:"Excel: 7 mg/kg (greșit)",altValue:7},{label:"10 mg/kg",value:10}] },
+     doses:[{label:"5 mg/kg",value:5},{label:"7,5 mg/kg",value:7.5},{label:"10 mg/kg",value:10}] },
    { name:"Locamin", conc:[C("500mg/ml",500,1)],
      doses:[{label:"10 mg/kg",value:10,drops:true},{label:"15 mg/kg",value:15,drops:true}] },
    { name:"Paracetamol IV", conc:[C("10mg/1ml",10,1)],
@@ -246,7 +338,7 @@ const CATEGORIES = [
    { name:"Lorazepam", conc:[C("4mg/4ml",4,4)],
      doses:[{label:"0,1 mg/kg",value:0.1,maxMg:4,note:"MAX 4 mg"}] },
    { name:"Diazepam", conc:[C("10mg/2ml",10,2)],
-     doses:[{label:"0,2 mg/kg",value:0.2,showMg:true},{label:"0,3 mg/kg",value:0.3,showMg:true,flag:"Excel: 0,32 mg/kg (greșit)",altValue:0.32}] },
+     doses:[{label:"0,2 mg/kg",value:0.2,showMg:true},{label:"0,3 mg/kg",value:0.3,showMg:true}] },
    { name:"Levetiracetam", conc:[C("500mg/fl",500,null)],
      doses:[{label:"40 mg/kg",value:40,onlyMg:true,note:"MAX 4,5 g în 5 min"},{label:"50 mg/kg",value:50,onlyMg:true},{label:"60 mg/kg",value:60,onlyMg:true}] },
    { name:"Fosfenitoină", conc:[C("250mg/5ml",250,5)],
@@ -291,101 +383,107 @@ const CATEGORIES = [
 ];
 
 /* ---------- utils ---------- */
+const W_MIN = 2, W_MAX = 80;
+const $ = id => document.getElementById(id);
 function fmt(n,dec){
   if(!isFinite(n)) return "—";
   dec = dec==null?2:dec;
   return n.toLocaleString('ro-RO',{minimumFractionDigits:dec,maximumFractionDigits:dec});
 }
-function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+/* doza totală, cu zecimale după mărime: 250 · 187,5 · 2,5 · 0,025 */
+function fmtDoza(n){
+  const d = n>=10?1 : n>=1?2 : 3;
+  return n.toLocaleString('ro-RO',{maximumFractionDigits:d});
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function norm(s){return String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
+/* «120mg/5ml» → «120 mg/5 ml»; «500mg/fl» → «500 mg/flacon» */
+function concTxt(label){return label.replace(/(\d)(mg|ml|IU)/g,'$1 $2').replace(/\/fl$/,'/flacon')}
+
+/* ---------- stare ---------- */
+let W = 25;            // greutatea curentă
+let PICK = '';         // medicamentul ales din listă ('' = toate)
+let SEL = {};          // concentrația aleasă per medicament (indexul), ținută pe dispozitiv
+try{ SEL = JSON.parse(localStorage.getItem('dozaje_conc')||'{}') || {}; }catch(e){ SEL = {}; }
+function saveSel(){ try{ localStorage.setItem('dozaje_conc', JSON.stringify(SEL)); }catch(e){} }
 
 /* ---------- render medicamente ---------- */
 function renderMeds(){
-  const w = parseFloat(document.getElementById('w').value) || 0;
-  const q = document.getElementById('q').value;
-  const root = document.getElementById('meds');
+  const root = $('meds');
   let html = '';
-
   CATEGORIES.forEach(cat=>{
-    const drugs = cat.drugs.filter(d=> !q || d.name===q);
+    const drugs = cat.drugs.filter(d=> !PICK || d.name===PICK);
     if(!drugs.length) return;
-    html += `<div class="cat"><h2>${esc(cat.name)}</h2><div class="grid">`;
-    drugs.forEach(d=> html += drugCard(d,w));
-    html += `</div></div>`;
+    html += `<section class="cat"><h2>${esc(cat.name)}</h2><div class="grid">`;
+    drugs.forEach(d=> html += drugCard(d,W));
+    html += `</div></section>`;
   });
-
-  root.innerHTML = html || `<div class="empty">Niciun medicament nu corespunde căutării.</div>`;
+  root.innerHTML = html || `<div class="empty">Niciun medicament găsit.</div>`;
 }
 
 function drugCard(d,w){
-  let head = `<div class="drug-head"><span class="drug-name">${esc(d.name)}</span>`;
-  if(d.conc){
-    head += `<span class="conc">`+d.conc.map(c=>`<div>${esc(c.label)}</div>`).join('')+`</span>`;
-  }
-  head += `</div>`;
+  const single = d.conc && d.conc.length===1;
+  let h = `<article class="drug"><div class="d-head"><h3>${esc(d.name)}</h3>`;
+  if(single) h += `<span class="conc">${esc(concTxt(d.conc[0].label))}</span>`;
+  h += `</div>`;
 
-  // age bands (Aerius)
+  // pe vârstă (Aerius)
   if(d.ageBands){
-    let b = d.ageBands.map(x=>`<div class="band"><b>${x.label}</b> — ${x.text}</div>`).join('');
-    return `<div class="drug">${head}${b}</div>`;
+    h += d.ageBands.map(x=>`<div class="band"><b>${x.label}</b><span>${x.text}</span></div>`).join('');
+    return h+`</article>`;
   }
-  // weight bands (Desitin)
+  // pe greutate (Desitin)
   if(d.weightBands){
-    let b = d.weightBands.map(x=>{
-      const active = (x.max!=null && w>0 && w<x.max) || (x.min!=null && w>=x.min);
-      return `<div class="band${active?' active':''}"><b>${x.label}</b> — ${x.text}</div>`;
+    h += d.weightBands.map(x=>{
+      const on = (x.max!=null && w>0 && w<x.max) || (x.min!=null && w>=x.min);
+      return `<div class="band${on?' on':''}"><b>${x.label}</b><span>${x.text}</span></div>`;
     }).join('');
-    return `<div class="drug">${head}${b}</div>`;
+    return h+`</article>`;
   }
 
-  // dose table
-  const multi = d.conc.length>1;
-  let thead = `<thead><tr><th>Doză</th>`;
-  if(multi) d.conc.forEach(c=> thead += `<th class="r">${esc(c.label)}</th>`);
-  else thead += `<th class="r">Volum</th>`;
-  thead += `</tr></thead>`;
-
-  let body = '<tbody>';
+  // concentrația flaconului
+  let si = SEL[d.name]; if(!(si>=0 && si<d.conc.length)) si = 0;
+  if(!single){
+    h += `<div class="seg" role="group" aria-label="Concentrația flaconului">` +
+      d.conc.map((c,i)=>`<button type="button" data-drug="${esc(d.name)}" data-i="${i}" aria-pressed="${i===si}">${esc(concTxt(c.label))}</button>`).join('') +
+      `</div>`;
+  }
+  const c = d.conc[si];
   d.doses.forEach(dose=>{
-    body += `<tr><td><span class="dose-lbl">${esc(dose.label)}</span>`;
-    if(dose.note) body += `<span class="rownote">${esc(dose.note)}</span>`;
-    if(dose.flag) body += `<span class="rownote flag">⚠ ${esc(dose.flag)}</span>`;
-    body += `</td>`;
-    d.conc.forEach(c=> body += `<td class="r">${cell(dose,c,w)}</td>`);
-    body += `</tr>`;
+    const r = calc(dose,c,w);
+    h += `<div class="row"><div class="r-l"><div class="r-dose">${esc(dose.label)}</div>`;
+    if(r.sub) h += `<div class="r-sub">${esc(r.sub)}</div>`;
+    h += `</div><div class="r-v"><b class="${r.cap?'cap':''}">${r.main}</b> <i>${r.u}</i>`;
+    if(r.extra) h += `<div class="r-x">${r.extra}</div>`;
+    h += `</div></div>`;
   });
-  body += '</tbody>';
-
-  return `<div class="drug">${head}<table>${thead}${body}</table></div>`;
+  return h+`</article>`;
 }
 
-function cell(dose,c,w){
-  if(w<=0) return '—';
+/* o doză × o concentrație → ce se afișează pe rând */
+function calc(dose,c,w){
+  if(w<=0) return {main:'—',u:'',sub:dose.note||''};
+  const unit = dose.unit || 'mg';
   let mg = w*dose.value;                 // doza totală (mg sau IU)
   let capMg=false;
   if(dose.maxMg!=null && mg>dose.maxMg){ mg=dose.maxMg; capMg=true; }
 
   // numai mg (ex: Levetiracetam reconstituit)
   if(dose.onlyMg || c.ml==null){
-    const g = mg>=1000? ` (${fmt(mg/1000,2)} g)`:'';
-    return `<span class="val mg${capMg?' capped':''}">${fmt(mg,0)} mg${g}</span>`;
+    return {main:fmt(mg,0), u:'mg', extra: mg>=1000? fmt(mg/1000,2)+' g' : '', cap:capMg, sub:dose.note||''};
   }
 
   const perMl = c.mg/c.ml;               // mg per ml
   let ml = mg/perMl;
   let capMl=false;
-  if(dose.maxMl!=null && ml>dose.maxMl){ ml=dose.maxMl; capMl=true; }
+  if(dose.maxMl!=null && ml>dose.maxMl){ ml=dose.maxMl; capMl=true; mg=ml*perMl; }
+  const cap = capMg||capMl;
 
-  const cls = (capMg||capMl)?'val capped':'val';
-  let out;
   if(dose.showMg){
-    out = `<span class="${cls}">${fmt(mg,2)} mg</span><span class="rownote">${fmt(ml,2)} ml</span>`;
-    if(dose.altValue!=null) out += `<span class="rownote flag">Excel: ${fmt(w*dose.altValue,2)} mg</span>`;
-  } else {
-    out = `<span class="${cls}">${fmt(ml,2)} ml</span>`;
-    if(dose.drops) out += `<span class="rownote">${fmt(ml*20,0)} pic.</span>`;
-    if(dose.altValue!=null) out += `<span class="rownote flag">Excel: ${fmt((w*dose.altValue)/perMl,2)} ml</span>`;
+    return {main:fmt(mg,2), u:'mg', extra: fmt(ml,2)+' ml', cap, sub:dose.note||''};
   }
-  return out;
+  const sub = [fmtDoza(mg)+' '+unit+(cap?' (plafon)':''), dose.note].filter(Boolean).join(' · ');
+  return {main:fmt(ml,2), u:'ml', extra: dose.drops? fmt(ml*20,0)+' pic.' : '', cap, sub};
 }
 
 /* ---------- fluide ---------- */
@@ -396,59 +494,141 @@ function maintenance(w){
   return 1500+20*(w-20);
 }
 function renderFluids(){
-  const w = parseFloat(document.getElementById('w').value)||0;
-  const tb = document.getElementById('fluids');
+  const w = W;
+  const tb = $('fluids');
   const pcts=[3,5,10,15];
   const m = maintenance(w);
   const def = pcts.map(p=> w*p*10);              // ml
   const total = def.map(d=> m+d);
   const rate = total.map(t=> t/24);
   const cad = def.map(d=> (m+d/2)/24);
-  const row=(label,vals,dec,big)=>`<tr><td>${label}</td>`+vals.map(v=>`<td class="${big?'big':''}">${fmt(v,dec)}</td>`).join('')+`</tr>`;
+  const row=(label,vals,dec,big,hl)=>`<tr${hl?' class="hl"':''}><td>${label}</td>`+vals.map(v=>`<td class="${big?'big':''}">${fmt(v,dec)}</td>`).join('')+`</tr>`;
   tb.innerHTML =
     `<tr><td>Necesar 24h <span class="u">ml</span></td><td colspan="4" style="text-align:left" class="big">${fmt(m,0)}</td></tr>`+
     row('Deficit <span class="u">ml</span>', def, 0, false)+
     row('Necesar + deficit <span class="u">ml</span>', total, 0, false)+
-    row('Rată /24h <span class="u">ml/h</span>', rate, 2, true)+
+    row('Rată /24h <span class="u">ml/h</span>', rate, 2, true, true)+
     row('Rehidratare CAD <span class="u">ml/h</span>', cad, 2, false);
 }
 
 /* ---------- Na corectat ---------- */
 function renderNa(){
-  const na = parseFloat(document.getElementById('na').value);
-  const glu = parseFloat(document.getElementById('glu').value);
-  const out = document.getElementById('naOut');
+  const na = parseFloat($('na').value);
+  const glu = parseFloat($('glu').value);
+  const out = $('naOut');
   if(!isFinite(na)||!isFinite(glu)){ out.textContent='—'; return; }
   out.textContent = fmt(na + 1.6*(glu-100)/100, 2);
 }
 
-/* ---------- populare dropdown-uri ---------- */
-function buildControls(){
-  const ws=document.getElementById('w');
-  let wo='';
-  for(let v=2; v<=10.0001; v+=0.5){ const lbl=Number.isInteger(v)?String(v):String(v).replace('.',','); wo+=`<option value="${v}">${lbl}</option>`; }
-  for(let v=11; v<=80; v++){ wo+=`<option value="${v}">${v}</option>`; }
-  ws.innerHTML=wo; ws.value="25";
-
-  const qs=document.getElementById('q');
-  let qo='<option value="">Toate medicamentele</option>';
-  CATEGORIES.forEach(cat=>{
-    qo+=`<optgroup label="${esc(cat.name)}">`;
-    cat.drugs.forEach(d=> qo+=`<option value="${esc(d.name)}">${esc(d.name)}</option>`);
-    qo+='</optgroup>';
-  });
-  qs.innerHTML=qo;
+/* ---------- greutatea: − / + / tastat ---------- */
+const wIn = $('w');
+function wTxt(w){ return String(Math.round(w*10)/10).replace('.',','); }
+function sizeW(){ wIn.style.width = Math.max(2, wIn.value.length) + 0.4 + 'ch'; }
+function setW(w, fromInput){
+  w = Math.round(Math.min(W_MAX, Math.max(W_MIN, w))*10)/10;
+  W = w;
+  if(!fromInput){ wIn.value = wTxt(w); }
+  sizeW();
+  $('wMinus').disabled = W<=W_MIN;
+  $('wPlus').disabled = W>=W_MAX;
+  renderAll();
 }
+/* sub 10 kg din 0,5 în 0,5; de la 10 kg din 1 în 1 */
+function stepW(dir){
+  const w = W;
+  const n = dir>0 ? (w<10 ? Math.floor(w*2)/2+0.5 : Math.floor(w)+1)
+                  : (w<=10 ? Math.ceil(w*2)/2-0.5 : Math.ceil(w)-1);
+  setW(n);
+}
+wIn.addEventListener('input', ()=>{
+  const v = parseFloat(wIn.value.replace(',','.'));
+  sizeW();
+  if(isFinite(v) && v>=W_MIN && v<=W_MAX) setW(v, true);
+});
+wIn.addEventListener('blur', ()=> setW(W));
+wIn.addEventListener('focus', ()=> wIn.select());
+wIn.addEventListener('keydown', e=>{
+  if(e.key==='Enter'){ wIn.blur(); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); stepW(1); }
+  else if(e.key==='ArrowDown'){ e.preventDefault(); stepW(-1); }
+});
 
-/* ---------- events ---------- */
+/* apăsat lung = se repetă, tot mai repede */
+function holdRepeat(btn, dir){
+  let t=null, iv=null, viaPointer=false;
+  const stop=()=>{ clearTimeout(t); clearInterval(iv); t=iv=null; };
+  btn.addEventListener('pointerdown', e=>{
+    if(e.button!==0) return;
+    viaPointer=true; stepW(dir);
+    t=setTimeout(()=>{ iv=setInterval(()=>stepW(dir), 90); }, 420);
+  });
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=>btn.addEventListener(ev, stop));
+  btn.addEventListener('contextmenu', e=>e.preventDefault());
+  btn.addEventListener('click', ()=>{ if(viaPointer){ viaPointer=false; return; } stepW(dir); });
+}
+holdRepeat($('wMinus'), -1);
+holdRepeat($('wPlus'), 1);
+
+/* ---------- concentrația (delegat pe listă) ---------- */
+$('meds').addEventListener('click', e=>{
+  const b = e.target.closest('.seg button');
+  if(!b) return;
+  SEL[b.dataset.drug] = +b.dataset.i;
+  saveSel();
+  renderMeds();
+});
+
+/* ---------- lista medicamentelor (ascunsă) ---------- */
+const sheet = $('sheet'), sq = $('sq');
+function renderSheet(){
+  const nq = norm(sq.value.trim());
+  let h = nq ? '' : `<button type="button" class="all${PICK?'':' on'}" data-pick="">Toate medicamentele</button>`;
+  let n = 0;
+  CATEGORIES.forEach(cat=>{
+    const ds = cat.drugs.filter(d=> !nq || norm(d.name).includes(nq));
+    if(!ds.length) return;
+    h += `<div class="grp">${esc(cat.name)}</div>`;
+    ds.forEach(d=>{ n++; h += `<button type="button" data-pick="${esc(d.name)}"${PICK===d.name?' class="on"':''}>${esc(d.name)}</button>`; });
+  });
+  if(nq && !n) h += `<div class="none">Niciun medicament cu acest nume.</div>`;
+  $('shList').innerHTML = h;
+}
+function openSheet(){
+  sq.value=''; renderSheet();
+  sheet.hidden=false; document.body.style.overflow='hidden';
+  setTimeout(()=>{ if(matchMedia('(min-width:760px)').matches) sq.focus(); }, 30);
+}
+function closeSheet(){ sheet.hidden=true; document.body.style.overflow=''; $('filt').focus({preventScroll:true}); }
+function setPick(name){
+  PICK = name;
+  $('filtLbl').textContent = name || 'Toate medicamentele';
+  $('pickbar').hidden = !name;
+  $('tools').hidden = !!name;
+  renderMeds();
+  window.scrollTo({top:0});
+}
+$('filt').addEventListener('click', openSheet);
+$('sheetBg').addEventListener('click', closeSheet);
+$('sheetDone').addEventListener('click', closeSheet);
+$('clearPick').addEventListener('click', ()=> setPick(''));
+sq.addEventListener('input', renderSheet);
+sq.addEventListener('keydown', e=>{
+  if(e.key==='Enter'){ const first = $('shList').querySelector('button[data-pick]:not([data-pick=""])'); if(first){ setPick(first.dataset.pick); closeSheet(); } }
+});
+$('shList').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-pick]');
+  if(!b) return;
+  setPick(b.dataset.pick); closeSheet();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !sheet.hidden) closeSheet(); });
+
+/* ---------- pornire ---------- */
 function renderAll(){ renderMeds(); renderFluids(); }
 ['input','change'].forEach(ev=>{
-  document.getElementById('w').addEventListener(ev,renderAll);
-  document.getElementById('q').addEventListener(ev,renderMeds);
-  document.getElementById('na').addEventListener(ev,renderNa);
-  document.getElementById('glu').addEventListener(ev,renderNa);
+  $('na').addEventListener(ev,renderNa);
+  $('glu').addEventListener(ev,renderNa);
 });
-buildControls(); renderAll(); renderNa();
+setW(25); renderNa();
 </script>
 </body>
 </html>
