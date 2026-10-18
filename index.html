@@ -155,11 +155,23 @@
   .srch input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:16px}
   .sh-list{overflow-y:auto;padding:0 8px 18px;overscroll-behavior:contain}
   .sh-list .grp{padding:14px 8px 4px;font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
-  .sh-list button{display:block;width:100%;min-height:46px;border:none;border-radius:10px;background:transparent;text-align:left;padding:0 8px;font-size:16px}
+  .sh-list button{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;border:none;border-radius:10px;background:transparent;text-align:left;padding:0 8px;font-size:16px}
   .sh-list button:hover{background:var(--bg)}
-  .sh-list button.on{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
-  .sh-list .all{color:var(--accent);font-weight:700}
+  .sh-list button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
+  .chk{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid #C3CBD7;display:flex;align-items:center;justify-content:center;color:#fff;background:#fff}
+  .sh-list button[aria-pressed="true"] .chk{background:var(--accent);border-color:var(--accent)}
+  .chk svg{opacity:0}
+  .sh-list button[aria-pressed="true"] .chk svg{opacity:1}
   .sh-list .none{padding:20px 8px;color:var(--muted)}
+  .sh-foot{padding:10px 16px 14px;border-top:1px solid var(--line)}
+  .sh-go{width:100%;height:50px;border:none;border-radius:14px;background:var(--accent);color:#fff;font-size:16px;font-weight:700}
+  .sh-go:hover{background:var(--accent-ink)}
+  .txtbtn[hidden]{display:none}
+
+  .pickbar{display:flex;flex-wrap:wrap;gap:8px}
+  .pickbar[hidden]{display:none}
+  .chip-x.sel{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+  .chip-x.sel svg{color:var(--muted)}
 
   :focus-visible{outline:3px solid #7FA6F0;outline-offset:2px}
 
@@ -212,11 +224,7 @@
 </header>
 
 <main class="wrap">
-  <div class="pickbar" id="pickbar" hidden>
-    <button class="chip-x" id="clearPick" type="button">Arată toate medicamentele
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
-    </button>
-  </div>
+  <div class="pickbar" id="pickbar" hidden></div>
 
   <div id="meds"></div>
 
@@ -271,8 +279,8 @@
     <div class="grip" aria-hidden="true"></div>
     <div class="sh-top">
       <div class="sh-row">
-        <h2 id="shTitle">Alege un medicament</h2>
-        <button class="txtbtn" id="sheetDone" type="button">Gata</button>
+        <h2 id="shTitle">Alege medicamentele</h2>
+        <button class="txtbtn" id="sheetClear" type="button" hidden>Golește</button>
       </div>
       <label class="srch">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B6676" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
@@ -280,6 +288,7 @@
       </label>
     </div>
     <div class="sh-list" id="shList"></div>
+    <div class="sh-foot"><button class="sh-go" id="sheetDone" type="button">Arată toate medicamentele</button></div>
   </div>
 </div>
 
@@ -402,7 +411,7 @@ function concTxt(label){return label.replace(/(\d)(mg|ml|IU)/g,'$1 $2').replace(
 
 /* ---------- stare ---------- */
 let W = 25;            // greutatea curentă
-let PICK = '';         // medicamentul ales din listă ('' = toate)
+const PICK = new Set();   // medicamentele alese din listă (gol = toate)
 let SEL = {};          // concentrația aleasă per medicament (indexul), ținută pe dispozitiv
 try{ SEL = JSON.parse(localStorage.getItem('dozaje_conc')||'{}') || {}; }catch(e){ SEL = {}; }
 function saveSel(){ try{ localStorage.setItem('dozaje_conc', JSON.stringify(SEL)); }catch(e){} }
@@ -412,7 +421,7 @@ function renderMeds(){
   const root = $('meds');
   let html = '';
   CATEGORIES.forEach(cat=>{
-    const drugs = cat.drugs.filter(d=> !PICK || d.name===PICK);
+    const drugs = cat.drugs.filter(d=> !PICK.size || PICK.has(d.name));
     if(!drugs.length) return;
     html += `<section class="cat"><h2>${esc(cat.name)}</h2><div class="grid">`;
     drugs.forEach(d=> html += drugCard(d,W));
@@ -580,45 +589,74 @@ $('meds').addEventListener('click', e=>{
 
 /* ---------- lista medicamentelor (ascunsă) ---------- */
 const sheet = $('sheet'), sq = $('sq');
+const CHK = `<span class="chk" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>`;
+const XS = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
+function nMed(n){ return n===1 ? '1 medicament' : n+' medicamente'; }
 function renderSheet(){
   const nq = norm(sq.value.trim());
-  let h = nq ? '' : `<button type="button" class="all${PICK?'':' on'}" data-pick="">Toate medicamentele</button>`;
-  let n = 0;
+  let h = '', n = 0;
   CATEGORIES.forEach(cat=>{
     const ds = cat.drugs.filter(d=> !nq || norm(d.name).includes(nq));
     if(!ds.length) return;
     h += `<div class="grp">${esc(cat.name)}</div>`;
-    ds.forEach(d=>{ n++; h += `<button type="button" data-pick="${esc(d.name)}"${PICK===d.name?' class="on"':''}>${esc(d.name)}</button>`; });
+    ds.forEach(d=>{ n++; h += `<button type="button" data-pick="${esc(d.name)}" aria-pressed="${PICK.has(d.name)}">${CHK}<span>${esc(d.name)}</span></button>`; });
   });
   if(nq && !n) h += `<div class="none">Niciun medicament cu acest nume.</div>`;
   $('shList').innerHTML = h;
+  $('sheetClear').hidden = !PICK.size;
+  $('sheetDone').textContent = PICK.size ? 'Arată '+nMed(PICK.size) : 'Arată toate medicamentele';
 }
+let lastFocus = null;
 function openSheet(){
+  lastFocus = document.activeElement;
   sq.value=''; renderSheet();
   sheet.hidden=false; document.body.style.overflow='hidden';
+  $('shList').scrollTop = 0;
   setTimeout(()=>{ if(matchMedia('(min-width:760px)').matches) sq.focus(); }, 30);
 }
-function closeSheet(){ sheet.hidden=true; document.body.style.overflow=''; $('filt').focus({preventScroll:true}); }
-function setPick(name){
-  PICK = name;
-  $('filtLbl').textContent = name || 'Toate medicamentele';
-  $('pickbar').hidden = !name;
-  $('tools').hidden = !!name;
-  renderMeds();
+function closeSheet(){
+  sheet.hidden=true; document.body.style.overflow='';
   window.scrollTo({top:0});
+  (lastFocus && lastFocus.isConnected ? lastFocus : $('filt')).focus({preventScroll:true});
 }
+/* selecția s-a schimbat: antetul, bara cu alegerile, cardurile */
+function applyPick(){
+  const names = [...PICK];
+  $('filtLbl').textContent = !names.length ? 'Toate medicamentele' : names.length===1 ? names[0] : nMed(names.length);
+  const bar = $('pickbar');
+  bar.hidden = !names.length;
+  bar.innerHTML = names.length ?
+    names.map(nm=>`<button class="chip-x sel" type="button" data-unpick="${esc(nm)}" aria-label="Scoate ${esc(nm)}">${esc(nm)} ${XS}</button>`).join('') +
+    `<button class="chip-x" type="button" data-unpick="">Arată toate ${XS}</button>` : '';
+  $('tools').hidden = !!names.length;
+  renderMeds();
+}
+function togglePick(name){ PICK.has(name) ? PICK.delete(name) : PICK.add(name); applyPick(); renderSheet(); }
 $('filt').addEventListener('click', openSheet);
 $('sheetBg').addEventListener('click', closeSheet);
 $('sheetDone').addEventListener('click', closeSheet);
-$('clearPick').addEventListener('click', ()=> setPick(''));
+$('sheetClear').addEventListener('click', ()=>{ PICK.clear(); applyPick(); renderSheet(); });
+$('pickbar').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-unpick]');
+  if(!b) return;
+  if(b.dataset.unpick) PICK.delete(b.dataset.unpick); else PICK.clear();
+  applyPick();
+  if(!PICK.size) $('filt').focus({preventScroll:true});
+});
 sq.addEventListener('input', renderSheet);
 sq.addEventListener('keydown', e=>{
-  if(e.key==='Enter'){ const first = $('shList').querySelector('button[data-pick]:not([data-pick=""])'); if(first){ setPick(first.dataset.pick); closeSheet(); } }
+  if(e.key==='Enter'){
+    e.preventDefault();
+    const first = $('shList').querySelector('button[data-pick]');
+    if(first){ if(!PICK.has(first.dataset.pick)) togglePick(first.dataset.pick); sq.value=''; renderSheet(); }
+  }
 });
 $('shList').addEventListener('click', e=>{
   const b = e.target.closest('button[data-pick]');
   if(!b) return;
-  setPick(b.dataset.pick); closeSheet();
+  const y = $('shList').scrollTop;
+  togglePick(b.dataset.pick);
+  $('shList').scrollTop = y;
 });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !sheet.hidden) closeSheet(); });
 
