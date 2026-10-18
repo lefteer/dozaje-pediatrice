@@ -73,35 +73,49 @@
     display:inline-flex;align-items:center;gap:8px;padding:0 13px 0 15px;font-size:14px;font-weight:700;
   }
   .cat{margin-top:22px}
-  .cat h2{margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .cat h2{margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--c-ink,var(--muted));display:flex;align-items:center;gap:8px}
+
+  /* culoarea fiecărei categorii: fundal · linii · suprafețe · cifre · punct */
+  .k-febra  {--c-bg:#FFF5ED;--c-line:#F6DCC6;--c-mid:#FCE8D7;--c-ink:#B54708;--c-dot:#F79009}
+  .k-emeza  {--c-bg:#FFF3F6;--c-line:#F5D5DF;--c-mid:#FCE4EB;--c-ink:#B4235A;--c-dot:#E8467C}
+  .k-cortico{--c-bg:#FFFAEB;--c-line:#F2E1AE;--c-mid:#FBF0CC;--c-ink:#8F5D00;--c-dot:#E0A100}
+  .k-resp   {--c-bg:#F0F8FF;--c-line:#CCE3F6;--c-mid:#DFEEFB;--c-ink:#0B69A3;--c-dot:#2E9BE6}
+  .k-urg    {--c-bg:#FFF3F2;--c-line:#F6D1CC;--c-mid:#FDE3DF;--c-ink:#B42318;--c-dot:#E5483A}
+  .k-sed    {--c-bg:#F7F4FF;--c-line:#DDD3F7;--c-mid:#ECE5FD;--c-ink:#6234C9;--c-dot:#8B5CF6}
+  .k-anest  {--c-bg:#F3F5FF;--c-line:#D3DAF6;--c-mid:#E4E8FC;--c-ink:#3540A8;--c-dot:#5B6BE0}
+  .k-metab  {--c-bg:#FCF3FC;--c-line:#ECD1ED;--c-mid:#F6E2F6;--c-ink:#9B2C9B;--c-dot:#C64FC6}
+  .k-ab     {--c-bg:#EFFAF8;--c-line:#C6E8E1;--c-mid:#DBF2EE;--c-ink:#0E7469;--c-dot:#18A594}
+  .dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--c-dot)}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;align-items:start}
 
-  .drug{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 14px 4px}
+  .drug{background:var(--c-bg,var(--card));border:1px solid var(--c-line,var(--line));border-radius:var(--radius);padding:14px 14px 4px}
   .d-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:10px}
   .d-head h3{margin:0;font-size:18px;font-weight:800;line-height:1.2}
-  .conc{font-size:12.5px;font-weight:700;color:var(--ink-2);background:var(--bg);border-radius:999px;padding:4px 10px;white-space:nowrap}
+  .conc{font-size:12.5px;font-weight:700;color:var(--ink-2);background:var(--c-mid,var(--bg));border-radius:999px;padding:4px 10px;white-space:nowrap}
 
-  .seg{display:flex;gap:4px;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:8px}
+  .seg{display:flex;gap:4px;background:var(--c-mid,var(--bg));border-radius:12px;padding:4px;margin-bottom:8px}
   .seg button{
     flex:1 1 0;min-width:0;min-height:38px;border:none;border-radius:9px;background:transparent;color:var(--muted);
     font-size:13px;font-weight:700;line-height:1.15;padding:4px 6px;
   }
   .seg button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(15,27,45,.16)}
 
-  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line-2)}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--c-line,var(--line-2))}
   .r-l{min-width:0}
   .r-dose{font-size:15px;font-weight:700}
   .r-sub{font-size:12.5px;color:var(--muted);margin-top:1px}
   .r-v{text-align:right;flex:none;font-variant-numeric:tabular-nums}
-  .r-v b{font-size:24px;font-weight:800;color:var(--accent);letter-spacing:-.3px}
+  .r-v b{font-size:24px;font-weight:800;color:var(--c-ink,var(--accent));letter-spacing:-.3px}
   .r-v b.cap{color:var(--danger)}
+  .capb{display:inline-block;vertical-align:5px;margin-right:6px;padding:2px 6px;border-radius:6px;background:var(--danger);color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
   .r-v i{font-style:normal;font-size:13px;font-weight:700;color:var(--muted)}
   .r-x{font-size:12px;color:var(--muted)}
 
   .band{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 10px;margin:0 -10px;border-top:1px solid var(--line-2);font-size:15px}
   .band b{font-weight:700}
-  .band span{font-weight:800;color:var(--accent);text-align:right}
-  .band.on{background:var(--accent-soft);border-radius:12px;border-top-color:transparent}
+  .band span{font-weight:800;color:var(--c-ink,var(--accent));text-align:right}
+  .band{border-top-color:var(--c-line,var(--line-2))}
+  .band.on{background:var(--c-mid,var(--accent-soft));border-radius:12px;border-top-color:transparent}
   .band.on + .band{border-top-color:transparent}
   .drug .band:last-child{margin-bottom:6px}
 
@@ -146,7 +160,7 @@
     display:flex;flex-direction:column;box-shadow:0 -10px 30px rgba(15,27,45,.2);
     padding-bottom:env(safe-area-inset-bottom);animation:urca .18s ease-out;
   }
-  @keyframes urca{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+  @keyframes urca{from{transform:translateY(24px)}to{transform:none}}
   .grip{width:40px;height:5px;border-radius:999px;background:#D9DFE8;margin:10px auto 4px}
   .sh-top{padding:6px 16px 10px;display:flex;flex-direction:column;gap:10px}
   .sh-row{display:flex;align-items:center;justify-content:space-between}
@@ -155,7 +169,8 @@
   .srch{display:flex;align-items:center;gap:8px;height:46px;border-radius:12px;background:var(--bg);padding:0 12px}
   .srch input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:16px}
   .sh-list{overflow-y:auto;padding:0 8px 18px;overscroll-behavior:contain}
-  .sh-list .grp{padding:14px 8px 4px;font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+  .sh-list .grp{padding:14px 8px 4px;font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--c-ink,var(--muted));display:flex;align-items:center;gap:8px}
+  .sh-list .grp .dot{width:9px;height:9px}
   .sh-list button{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;border:none;border-radius:10px;background:transparent;text-align:left;padding:0 8px;font-size:16px}
   .sh-list button:hover{background:var(--bg)}
   .sh-list button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
@@ -171,7 +186,8 @@
 
   .pickbar{display:flex;flex-wrap:wrap;gap:8px}
   .pickbar[hidden]{display:none}
-  .chip-x.sel{background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+  .chip-x.sel{background:var(--c-bg,#fff);border:1.5px solid var(--c-line,var(--line));color:var(--ink)}
+  .chip-x.sel .dot{width:9px;height:9px}
   .chip-x.sel svg{color:var(--muted)}
 
   :focus-visible{outline:3px solid #7FA6F0;outline-offset:2px}
@@ -307,7 +323,7 @@
 const C = (label,mg,ml)=>({label,mg,ml});
 
 const CATEGORIES = [
- { name:"Antitermice / Analgezice", drugs:[
+ { name:"Antitermice / Analgezice", key:"febra", drugs:[
    { name:"Paracetamol", conc:[C("120mg/5ml",120,5),C("150mg/5ml",150,5),C("200mg/5ml",200,5)],
      doses:[{label:"10 mg/kg",value:10},{label:"12 mg/kg",value:12},{label:"15 mg/kg",value:15}] },
    { name:"Ibuprofen", conc:[C("100mg/5ml",100,5),C("200mg/5ml",200,5)],
@@ -317,7 +333,7 @@ const CATEGORIES = [
    { name:"Paracetamol IV", conc:[C("10mg/1ml",10,1)],
      doses:[{label:"10 mg/kg",value:10},{label:"15 mg/kg",value:15}] },
  ]},
- { name:"Antiemetice", drugs:[
+ { name:"Antiemetice", key:"emeza", drugs:[
    { name:"Osetron", conc:[C("2mg/20ml",2,20)],
      doses:[{label:"0,1 mg/kg",value:0.1}] },
    { name:"Granisetron", conc:[C("1mg/10ml",1,10)],
@@ -325,19 +341,19 @@ const CATEGORIES = [
    { name:"Metoclopramid", conc:[C("10mg/10ml",10,10)],
      doses:[{label:"0,1 mg/kg",value:0.1},{label:"0,15 mg/kg",value:0.15}] },
  ]},
- { name:"Corticoizi", drugs:[
+ { name:"Corticoizi", key:"cortico", drugs:[
    { name:"Hidrocortizon", conc:[C("100mg/2ml",100,2)],
      doses:[{label:"4 mg/kg",value:4},{label:"10 mg/kg",value:10,note:"șoc anafilactic / astm"}] },
    { name:"Dexametazonă", conc:[C("8mg/8ml",8,8)],
      doses:[{label:"0,15 mg/kg",value:0.15},{label:"0,2 mg/kg",value:0.2},{label:"0,3 mg/kg",value:0.3},{label:"0,6 mg/kg",value:0.6}] },
  ]},
- { name:"Respirator (nebulizări)", drugs:[
+ { name:"Respirator (nebulizări)", key:"resp", drugs:[
    { name:"Adrenalină (neb)", conc:[C("1mg/1ml",1,1)],
      doses:[{label:"0,3 mg/kg",value:0.3,maxMl:5},{label:"0,4 mg/kg",value:0.4,maxMl:5},{label:"0,5 mg/kg",value:0.5,maxMl:5}] },
    { name:"Ventolin (neb)", conc:[C("5mg/1ml",5,1)],
      doses:[{label:"0,15 mg/kg",value:0.15,note:"MAX 3 repetări"}] },
  ]},
- { name:"Resuscitare / urgențe cardiace", drugs:[
+ { name:"Resuscitare / urgențe cardiace", key:"urg", drugs:[
    { name:"Adrenalină IV", conc:[C("0,1mg/1ml",0.1,1)],
      doses:[{label:"0,01 mg/kg",value:0.01,note:"SCR, <60 bpm"},{label:"0,001 mg/kg",value:0.001,note:"șoc anafilactic"}] },
    { name:"Amiodaronă", conc:[C("150mg/3ml",150,3)],
@@ -349,7 +365,7 @@ const CATEGORIES = [
    { name:"Atropină", conc:[C("1mg/10ml",1,10)],
      doses:[{label:"0,02 mg/kg",value:0.02}] },
  ]},
- { name:"Sedare / anticonvulsivante", drugs:[
+ { name:"Sedare / anticonvulsivante", key:"sed", drugs:[
    { name:"Midazolam", conc:[C("5mg/5ml",5,5),C("5mg/10ml",5,10)],
      doses:[{label:"0,2 mg/kg",value:0.2,maxMg:10,note:"intramuscular"},{label:"0,15 mg/kg",value:0.15,maxMg:10,note:"IV/IO"}] },
    { name:"Lorazepam", conc:[C("4mg/4ml",4,4)],
@@ -363,7 +379,7 @@ const CATEGORIES = [
    { name:"Fenobarbital", conc:[C("200mg/2ml",200,2)],
      doses:[{label:"20 mg/kg",value:20,showMg:true,note:"în 15 min"}] },
  ]},
- { name:"Anestezie / RSI", drugs:[
+ { name:"Anestezie / RSI", key:"anest", drugs:[
    { name:"Fentanyl", conc:[C("0,05mg/5ml",0.05,5)],
      doses:[{label:"0,001 mg/kg",value:0.001},{label:"0,002 mg/kg",value:0.002}] },
    { name:"Midazolam (anestezie)", conc:[C("5mg/10ml",5,10)],
@@ -377,7 +393,7 @@ const CATEGORIES = [
    { name:"Lysthenon", conc:[C("100mg/5ml",100,5)],
      doses:[{label:"1 mg/kg",value:1},{label:"2 mg/kg",value:2}] },
  ]},
- { name:"Alergie / metabolic", drugs:[
+ { name:"Alergie / metabolic", key:"metab", drugs:[
    { name:"Insulină", conc:[C("40IU/40ml",40,40)],
      doses:[{label:"0,1 IU/kg",value:0.1,unit:"IU"}] },
    { name:"Aerius", conc:[C("0,5mg/ml",0.5,1)], ageBands:[
@@ -385,7 +401,7 @@ const CATEGORIES = [
    { name:"Desitin (diazepam rectal)", weightBands:[
      {label:"&lt; 15 kg",text:"tub de 5 mg",max:15},{label:"&gt; 15 kg",text:"tub de 10 mg",min:15}] },
  ]},
- { name:"Antibiotice (suspensii orale)", drugs:[
+ { name:"Antibiotice (suspensii orale)", key:"ab", drugs:[
    { name:"Augmentin", conc:[C("400mg/5ml",400,5),C("600mg/5ml",600,5)],
      doses:[{label:"25 mg/kg",value:25},{label:"40 mg/kg",value:40},{label:"50 mg/kg",value:50}] },
    { name:"Zinnat", conc:[C("125mg/5ml",125,5),C("250mg/5ml",250,5)],
@@ -431,7 +447,7 @@ function renderMeds(){
   CATEGORIES.forEach(cat=>{
     const drugs = cat.drugs.filter(d=> !PICK.size || PICK.has(d.name));
     if(!drugs.length) return;
-    html += `<section class="cat"><h2>${esc(cat.name)}</h2><div class="grid">`;
+    html += `<section class="cat k-${cat.key}"><h2><i class="dot" aria-hidden="true"></i>${esc(cat.name)}</h2><div class="grid">`;
     drugs.forEach(d=> html += drugCard(d,W));
     html += `</div></section>`;
   });
@@ -470,7 +486,7 @@ function drugCard(d,w){
     const r = calc(dose,c,w);
     h += `<div class="row"><div class="r-l"><div class="r-dose">${esc(dose.label)}</div>`;
     if(r.sub) h += `<div class="r-sub">${esc(r.sub)}</div>`;
-    h += `</div><div class="r-v"><b class="${r.cap?'cap':''}">${r.main}</b> <i>${r.u}</i>`;
+    h += `</div><div class="r-v">${r.cap?'<span class="capb">max</span>':''}<b class="${r.cap?'cap':''}">${r.main}</b> <i>${r.u}</i>`;
     if(r.extra) h += `<div class="r-x">${r.extra}</div>`;
     h += `</div></div>`;
   });
@@ -600,13 +616,15 @@ const sheet = $('sheet'), sq = $('sq');
 const CHK = `<span class="chk" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>`;
 const XS = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
 function nMed(n){ return n===1 ? '1 medicament' : n+' medicamente'; }
+const KEY_OF = {};    // medicament → cheia culorii categoriei lui
+CATEGORIES.forEach(cat=> cat.drugs.forEach(d=> KEY_OF[d.name] = cat.key));
 function renderSheet(){
   const nq = norm(sq.value.trim());
   let h = '', n = 0;
   CATEGORIES.forEach(cat=>{
     const ds = cat.drugs.filter(d=> !nq || norm(d.name).includes(nq));
     if(!ds.length) return;
-    h += `<div class="grp">${esc(cat.name)}</div>`;
+    h += `<div class="grp k-${cat.key}"><i class="dot" aria-hidden="true"></i>${esc(cat.name)}</div>`;
     ds.forEach(d=>{ n++; h += `<button type="button" data-pick="${esc(d.name)}" aria-pressed="${PICK.has(d.name)}">${CHK}<span>${esc(d.name)}</span></button>`; });
   });
   if(nq && !n) h += `<div class="none">Niciun medicament cu acest nume.</div>`;
@@ -634,7 +652,7 @@ function applyPick(){
   const bar = $('pickbar');
   bar.hidden = !names.length;
   bar.innerHTML = names.length ?
-    names.map(nm=>`<button class="chip-x sel" type="button" data-unpick="${esc(nm)}" aria-label="Scoate ${esc(nm)}">${esc(nm)} ${XS}</button>`).join('') +
+    names.map(nm=>`<button class="chip-x sel k-${KEY_OF[nm]}" type="button" data-unpick="${esc(nm)}" aria-label="Scoate ${esc(nm)}"><i class="dot" aria-hidden="true"></i>${esc(nm)} ${XS}</button>`).join('') +
     `<button class="chip-x" type="button" data-unpick="">Arată toate ${XS}</button>` : '';
   $('tools').hidden = !!names.length;
   renderMeds();
